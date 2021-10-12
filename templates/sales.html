@@ -1,0 +1,714 @@
+{% extends "base.html" %}
+
+{% block body %}
+<style>
+    #example1 {
+        border: 2px solid red;
+        padding: 10px;
+        border-radius: 25px;
+    }
+
+    #example2 {
+        background: #afbec4;
+        border: 2px solid rgb(161, 203, 219);
+        padding: 10px;
+        border-radius: 50px 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Sales
+    </h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <div class="col-xl-12 col-md-12 col-sm-12">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+    {% endwith %}
+
+    <div class="card" style="margin-bottom: 20px;">
+
+        {% if edit_sales == None %}
+
+        <form action="{{url_for('insert_sales')}}" onsubmit="get_table_data(event)" id="my_form" method="POST">
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputGroup">Sale_ID</label>
+                            <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                onchange="set_edit_sale_path()" name="SaleId" id="SaleId">
+                                <option value="" selected>--Select sale ID--</option>
+                                {% for sale in sales %}
+
+                                {% for buyer in buyers %}
+
+                                {% if buyer._id|string == sale.Buyer_Id|string %}
+                                <option value="{{ sale._id }}">{{ buyer.Name }} - {{ sale.Date_Time }}</option>
+                                {% endif %}
+
+                                {% endfor %}
+
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputDate">Date</label>
+                            <input class="form-control py-4" type="text" id="currentDate" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-4"></div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="BuyersList">Buyers</label>
+                            <select class="form-control selectpicker" data-live-search="true"
+                                onchange="get_buyer_list()" style="height: 50px;" name="BuyerId" id="buyersList"
+                                required>
+                                <option value="" selected>--Select buyer--</option>
+                                {% for buyer in buyers %}
+                                <option value="{{buyer._id}}">{{buyer.Name}} - ({{ buyer.Address }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputAddress">Address</label>
+                            <input class="form-control py-4" id="inputAddress" name="address" type="text" disabled />
+
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputContact">Contact</label>
+                            <input class="form-control py-4" id="inputContact" placeholder="____-_______" data-slots="_"
+                                name="contact" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputCity">City</label>
+                            <input class="form-control py-4" id="city" type="text" name="city" disabled />
+
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Add items</label>
+                            <div class="form-group mt-2 mb-0"><button type="button" data-toggle="modal"
+                                    onclick="remove_div()" data-target="#exampleModal" style="width: 60px;"
+                                    class="btn btn-primary btn-block">Add
+                                </button></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="NetPricee" value="0" name="NetPrice">
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputCompany">Company</label>
+                            <input type="hidden" value="{{ own._id }}" name="company_id">
+                            <input disabled value="{{ own.Name }}" class="form-control py-4" id="inputCompany"
+                                name="company" type="text" required />
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
+                        style="align-content: center;">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Item<br>Name</th>
+                                <th>Batch<br>No</th>
+                                <th>Pack<br>Size</th>
+                                <th>Sale<br>Price</th>
+                                <th>Quantity</th>
+                                <th>Discount</th>
+                                <th>Net Price</th>
+                                <th>Expiry<br>Date</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot style="background-color: rgb(197, 197, 197);">
+                            <tr style="text-align: center; font-size:medium; font-weight: bold;">
+                                <td style="font-weight: bold;">Total</td>
+                                <td></td>
+                                <td id="TotalPack"></td>
+                                <td></td>
+                                <td id="SumQuan"></td>
+                                <td></td>
+                                <td id="NetPrice">{{edit_sales.Net_Price}}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <br>
+
+                <div class="row">
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Create Inovice</label>
+                            <div class="form-group mt-2 mb-0">
+                                <button id="submit" type="submit" style="width: 130px ;"
+                                    class="btn btn-primary btn-block">Save Inovice
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </form>
+
+        {% else %}
+
+        <form action="{{url_for('edit_sales')}}" onsubmit="get_table_data(event)" id="my_form" method="POST">
+            <div class="card-body">
+                <input type="hidden" value="{{ edit_sales._id }}" name="id">
+                <div class="row">
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputGroup">Sale_ID</label>
+                            <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                onchange="set_edit_sale_path()" name="SaleId" id="SaleId">
+                                <option value="" selected>--Select sale ID--</option>
+                                {% for sale in sales %}
+
+                                {% for buyer in buyers %}
+
+                                {% if buyer._id|string == sale.Buyer_Id|string %}
+
+                                {% if sale._id == edit_sales._id %}
+
+                                <option value="{{ sale._id }}" selected>{{ buyer.Name }} - {{ sale.Date_Time }}</option>
+
+                                {% else %}
+
+                                <option value="{{ sale._id }}">{{ buyer.Name }} - {{ sale.Date_Time }}</option>
+
+                                {% endif %}
+
+                                {% endif %}
+
+                                {% endfor %}
+
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputExpiryDate">Date</label>
+                            <input class="form-control py-4" type="text" id="currentDate" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-4"></div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="BuyersList">Buyers</label>
+                            <select class="form-control selectpicker" onchange="get_buyer_list()" style="height: 50px;"
+                                name="BuyerId" id="buyersList" required>
+                                <option value="" selected>--Select buyer--</option>
+                                {% for buyer in buyers %}
+
+                                {% if buyer._id|string == edit_sales.Buyer_Id|string %}
+                                <option selected value="{{ buyer._id }}">{{ buyer.Name }}</option>
+                                {% else %}
+                                <option value="{{ buyer._id }}">{{ buyer.Name }}</option>
+                                {% endif %}
+
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputAddress">Address</label>
+                            <input class="form-control py-4" id="inputAddress" value="{{ buyer.Address }}"
+                                name="address" type="text" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputContact">Contact</label>
+                            <input class="form-control py-4" id="inputContact" value="{{ buyer.Contact }}"
+                                placeholder="____-_______" data-slots="_" name="contact" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputCity">City</label>
+                            <input class="form-control py-4" id="city" type="text" value="{{ buyer.City }}" name="city"
+                                disabled />
+
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Add Items</label>
+                            <div class="form-group mt-2 mb-0"><button type="button" data-toggle="modal"
+                                    onclick="remove_div()" data-target="#exampleModal" style="width: 60px;"
+                                    class="btn btn-primary btn-block">Add
+                                </button></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <input type="hidden" id="NetPricee" value="0" name="NetPrice">
+                            <label class="small mb-1" for="inputCompany">Company</label>
+                            <input type="hidden" value="{{ own._id }}" name="company_id">
+                            <input disabled value="{{ own.Name }}" class="form-control py-4" id="inputCompany"
+                                name="company" type="text" required />
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
+                        style="align-content: center;">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Item<br>Name</th>
+                                <th>Batch<br>No</th>
+                                <th>Pack<br>Size</th>
+                                <th>Sale<br>Price</th>
+                                <th>Quantity</th>
+                                <th>Discount</th>
+                                <th>Net Price</th>
+                                <th>Expiry<br>Date</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in edit_sales.Sales %}
+                            <tr id="myTableRow" style="text-align: center;">
+                                <td>{{sale.item_name}}</td>
+                                <td>{{sale.batch_no}}</td>
+                                <td>{{sale.pack_size}}</td>
+                                <td onkeyup="calculate_sum()">{{sale.sale_price}}</td>
+                                <td>{{sale.quantity}}</td>
+                                <td onkeyup="calculate_sum()">0</td>
+                                <td>{{sale.net_price}}</td>
+                                <td>{{sale.expiry_date}}</td>
+                                <td>
+                                    <input type="hidden" class="production_id" name="production_id"
+                                        value="{{ sale.production_id }}" />
+                                    <input type="hidden" name="item_id" value="{{ sale.item_id }}" />
+                                    <button type="button" onclick="get_button_path(this)"
+                                        class="btn btn-primary btn-danger">X</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+
+                        <tfoot style="background-color: rgb(197, 197, 197);">
+                            <tr style="text-align: center; font-size: medium; font-weight: bold;">
+                                <td>Total</td>
+                                <td></td>
+                                <td id="TotalPack"></td>
+                                <td></td>
+                                <td id="SumQuan"></td>
+                                <td></td>
+                                <td id="NetPrice">{{edit_sales.Net_Price}}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Update Inovice</label>
+                            <div class="form-group mt-2 mb-0"><button id="submit" type="submit" style="width: 130px ;"
+                                    class="btn btn-primary btn-block">Update
+                                    Inovice
+                                </button></div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </form>
+
+        {% endif %}
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 style="text-align: center;" class="modal-title" id="exampleModalLabel">Item List</h3>
+                    </div>
+                    <div class="modal-body">
+                        <label class="small mb-1" for="BuyersList">Select Item</label>
+                        <select class="form-control selectpicker" data-live-search="true" onchange="get_items_list()"
+                            style="height: 50px;" name="group" id="itemsList" required>
+                            <option value="" selected>--Select an item--</option>
+                            {% for item in items %}
+                            <option value="{{item._id}}">{{item.Name}}</option>
+                            {% endfor %}
+                        </select>
+                        <br>
+                        <br>
+                        <div id="item_production_list">
+
+                        </div>
+                        <hr>
+                        <div class="col-lg-12 col-lg-offset-10">
+
+                            <button type="button" class="btn btn-primary btn-danger" data-dismiss="modal"
+                                onclick="rest_model()">close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var today = new Date();
+            var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+            var dateTime = date;
+            document.getElementById("currentDate").value = dateTime;
+        </script>
+
+        <script>
+
+            window.onload = function () {
+                calculate_sum();
+            }
+
+            products = []
+
+            '{% for pro in items %}'
+            products.push({
+                '_id': '{{ pro._id }}',
+                'Name': '{{ pro.Name }}',
+                'Pack_Size': '{{ pro.Pack_Size }}',
+                'Net_Price': '{{ pro.Net_Price }}',
+                'Carton_Size': '{{ pro.Carton_Size }}',
+                'Discount': '{{ pro.Discount }}',
+            })
+            '{% endfor %}'
+
+            productions = []
+            '{% for pro in productions %}'
+            productions.push({
+                '_id': '{{ pro._id }}',
+                'Name': '{{ pro.Name }}',
+                'Doc_No': '{{ pro.Doc_No }}',
+                'Expiry_Date': '{{ pro.Expiry_Date }}',
+                'Manufacture_Batch': '{{ pro.Manufacture_Batch }}',
+                'Quantity': '{{ pro.Quantity }}',
+                'Pack_Size': '{{ pro.Pack_Size }}',
+                'Product_Name': '{{ pro.Product_Name }}'
+            })
+            '{% endfor %}'
+
+
+            function get_table_data(event) {
+
+                $("#dataTable > tbody > tr").each(function (index) {
+                    var this_row = $(this);
+                    var itemName = $.trim(this_row.find('td:eq(0)').html());//td:eq(0) means first td of this row
+                    var BatchNo = $.trim(this_row.find('td:eq(1)').html())
+                    var SalePrice = $.trim(this_row.find('td:eq(3)').html())
+                    var PackSize = $.trim(this_row.find('td:eq(2)').html())
+                    var Quantity = $.trim(this_row.find('td:eq(4)').html())
+                    var Discount = $.trim(this_row.find('td:eq(5)').html())
+                    var NetPrice = $.trim(this_row.find('td:eq(6)').html())
+                    var ExpiryDate = $.trim(this_row.find('td:eq(7)').html())
+
+                    var row = itemName + '%' + BatchNo + '%' + SalePrice + '%' + PackSize + '%' + Quantity + '%' + NetPrice + '%' + Discount + '%' + ExpiryDate
+                    $('#my_form').append(`<input type="hidden" Name="table" value="${row}" /> `)
+                });
+
+
+                //event.preventDefault();
+
+            }
+            function get_buyer_list() {
+
+                var value = $('#buyersList').val();
+
+                $('#inputAddress option').remove();
+
+                if (value != '') {
+                    $.ajax({
+                        data: {
+                            address: value,
+                            'csrfmiddlewaretoken': '{{csrf_token}}'
+                        },
+                        type: 'POST',
+                        url: '/get_buyer'
+                    })
+                        .done(function (data) {
+
+                            $('#inputAddress').val(data.success.Address);
+                            $('#inputContact').val(data.success.Contact);
+                            $('#city').val(data.success.City);
+                        });
+                }
+
+            }
+
+            function get_items_list() {
+                var value = $('#itemsList').val();
+                $("#item_production_list").empty();
+                check = false;
+                if (value != '') {
+                    $.each(productions, function (index, item) {
+                        if (item.Product_Name == value) {
+                            pack_size = get_pack_size_by_product(item.Product_Name, item.Quantity)
+                            if (parseInt(item.Quantity) > 0 && pack_size != -1) {
+                                check = true
+                                $('#item_production_list').append(
+                                    ` 
+                                        <div id="example2" class="row">
+                                            <input type="hidden" id="item_id${index}" value="${item.Product_Name}">
+                                            <div class="col-xl-3 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="small mb-1" for="inputbatch">Batch</label>
+                                                    <input class="form-control py-4" value="${item.Manufacture_Batch}" name="batch" type="text" disabled/>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-3 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="small mb-1" for="inputQuantity">Quantity</label>
+                                                    <input class="form-control py-4" id="Quantity${index}" min="1" max="${item.Quantity}" value="${item.Quantity}" 
+                                                        id="yourid" type="number" name="quantity" onKeyUp="set_pack_size(${index})"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-3 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="small mb-1" for="inputSize">Pack Size</label>
+                                                    <input class="form-control py-4" disabled id="pack_size${index}" min="1" max="${item.Pack_Size}" value="${pack_size}"  
+                                                        id="yourid" type="number" name="PackSize"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-3 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="small mb-1" for="save">Add item</label>
+                                                    <a class="btn btn-secondary btn-success" onclick="set_value_in_table('${item._id}', ${index})"  href="#" id="Add-item">Add</a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    `
+                                );
+                            }
+                        }
+                    });
+                }
+
+                if (check == false) {
+                    $('#item_production_list').append(
+                        ` 
+                            <div id="example2" class="row">
+                                
+                                <div class="col-xl-12 col-md-12">
+                                    <div class="form-group">
+                                        <label class="small mb-1" for="inputbatch">Message</label>
+                                        <input class="form-control" value="No Production Found for Selected Product" type="text" disabled/>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        `
+                    )
+                }
+
+            }
+            function get_button_path(row) {
+                quantity = $(row).closest('tr').find('td:eq(4)').html();
+                production_id = $(row).closest('tr').find('.production_id').val();
+            
+
+                $.each(productions, function (i, item) {
+                    if (item._id == production_id) {
+                        item.Quantity = parseInt(item.Quantity) + parseInt(quantity);
+                    }
+                });
+
+                $(row).closest('tr').remove();
+                calculate_sum();
+            }
+            function remove_div() {
+                $('#itemsList option[value=0]').prop('selected', true);
+                $('#item_production_list div').remove();
+            }
+            function set_value_in_table(id, pack_size_id) {
+
+                entered_quantity = parseInt($('#Quantity' + pack_size_id).val())
+                maximun_quantity = parseInt($('#Quantity' + pack_size_id).attr('max'))
+            
+
+                check = false;
+
+                if (entered_quantity > maximun_quantity) {
+                    alert(`Entered Quantity is Larger then the Available Quantity -> ${maximun_quantity} `)
+                }
+                else {
+                    $("#dataTable tr:gt(0)").each(function (index) {
+                        if (index == 0) {
+                            var this_row = $(this);
+                            var check = $.trim(this_row.find('td:eq(0)').html());
+                            if (check.indexOf("No data available in table") >= 0) {
+                                $('#dataTable tbody').empty();
+                            }
+
+                        }
+
+                    });
+
+                    $('#dataTable').DataTable().destroy();
+                    $.each(productions, function (index, item) {
+                        if (item._id == id) {
+                            check = true;
+                            product = get_product(item.Product_Name)
+                            //console.log(product)
+                            $('#dataTable tbody').append(
+                                `  
+                                    <tr id="myTableRow" style="text-align: center;">
+                                        <td>${item.Name}</td>
+                                        <td>${item.Manufacture_Batch}</td>
+                                        <td>${$('#pack_size' + pack_size_id).val()}</td>
+                                        <td onkeyup="calculate_sum()">${product.Net_Price}</td>
+                                        <td >${entered_quantity}</td>
+                                        <td>0</td>
+                                        <td onkeyup="calculate_sum()">${parseInt(entered_quantity) * parseFloat(product.Net_Price)}</td>
+                                        <td>${item.Expiry_Date}</td>
+                                        <td><input type="hidden" class="production_id" name="production_id" value="${item._id}"/><input type="hidden" name="item_id" value="${item.Product_Name}"/><button type="button" onclick="get_button_path(this)" class="btn btn-primary btn-danger">X</button></td>
+                                    </tr>                  
+                                `
+                            )
+                          
+                        }
+                    });
+                    $('#dataTable ').DataTable(
+                        {
+                            aLengthMenu: [
+                                [25, 50, 100, 200, -1],
+                                [25, 50, 100, 200, "All"]
+                            ],
+                            iDisplayLength: -1
+                        }
+                    );
+                    calculate_sum();
+
+                    if (check) {
+                      
+                        $.each(productions, function (i, item) {
+                            if (item._id == id) {
+                                item.Quantity = parseInt(item.Quantity) - parseInt(entered_quantity);
+
+                            }
+                        });
+
+                        rest_model();
+                    }
+                }
+
+            }
+
+            function set_edit_sale_path() {
+                window.location.href = "/sales?id=" + $('#SaleId').val();
+            }
+            function calculate_sum() {
+                $("#SumQuan").html('0');
+                toalPackSize = 0;
+                totalNetPrice = 0;
+                totalQuantity = 0;
+
+                $("#dataTable > tbody > tr").each(function (index) {
+                    var this_row = $(this);
+                    var PackSize = $.trim(this_row.find('td:eq(2)').html());
+                    var SalePrice = $.trim(this_row.find('td:eq(3)').html());
+                    var Quantity = $.trim(this_row.find('td:eq(4)').html());
+                    var Discount = $.trim(this_row.find('td:eq(5)').html());
+                    var NetPrice = $.trim(this_row.find('td:eq(6)').html());
+
+                    totalNetPrice = parseInt(totalNetPrice) + parseInt(NetPrice);
+                    totalQuantity = parseInt(totalQuantity) + parseInt(Quantity);
+                    toalPackSize = parseInt(toalPackSize) + parseInt(PackSize);
+
+                });
+
+                $("#SumQuan").html(totalQuantity);
+                $('#NetPrice').html(totalNetPrice);
+                $('#TotalPack').html(toalPackSize);
+            }
+
+            function set_pack_size(index) {
+
+                $.each(products, function (i, item) {
+                    if (item._id == $('#item_id' + index).val()) {
+                        quantity = parseInt($('#Quantity' + index).val())
+                        pack_size = parseInt(item.Pack_Size)
+                        $('#pack_size' + index).val(Math.ceil(quantity / pack_size))
+                    }
+                });
+            }
+
+
+            function get_pack_size_by_product(product_id, quantity) {
+                pack = -1;
+                $.each(products, function (i, product) {
+                    if (product._id == product_id) {
+                        pack_size = parseInt(product.Pack_Size)
+                        quantity = parseInt(quantity)
+                        pack = Math.ceil(quantity / pack_size);
+                    }
+                });
+
+                return pack;
+            }
+
+            function get_product(id) {
+                product = ''
+                $.each(products, function (i, item) {
+                    if (item._id == id) {
+                        product = item
+                    }
+                });
+                return product
+            }
+
+            function rest_model() {
+                $("#item_production_list").empty();
+                // $('#itemsList').val('');
+                $('#itemsList').selectpicker('val', '');
+            }
+
+        </script>
+        {% endblock %}

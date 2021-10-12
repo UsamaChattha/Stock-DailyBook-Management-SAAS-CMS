@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Product
+        Master /
+        Configuration Data Entry </h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <div class="col-xl-12 col-md-12 col-sm-12">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+    {% endwith %}
+
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+            {% if edit_product == None %}
+            <form action="{{url_for('insert_item')}}" method="POST">
+                <div class="row">
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputType">Item Type</label>
+                            <input class="form-control py-4" id="inputType" name="type" type="text"
+                                placeholder="Products" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputEdit">Edit Products</label>
+                            <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                onchange="set_edit_product_path()" name="EditProduct" id="EditProduct">
+                                <option value="0" selected>--Select Item/Product--</option>
+                                {% for product in products %}
+                                <option value="{{product._id}}">{{product.Name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputName">Item Name</label>
+                            <input class="form-control py-4" id="inputName" name="name" type="text"
+                                placeholder="Enter Item Name" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputGroup">Item Group</label>
+                            <select class="form-control selectpicker" onchange="get_default_supplier()"
+                                style="height: 50px;" name="group" id="group" required>
+                                <option value="" selected>--Select Item Group--</option>
+                                <option value="Medicine">Medicine</option>
+                                <option value="Raw_Material">Raw Material</option>
+                                <option value="Packing_Material">Packing Material</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputDefaultSupplier">Default Supplier</label>
+                            <select class="form-control DefaultSupplier" style="height: 35px;" name="DefaultSupplier"
+                                id="DefaultSupplier" required>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <span class="border border-bottom-0 border-dark col-xl-12">
+                        <div class="row">
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputCartonSize">Carton Size -------- e.g
+                                        pack(1-200)</label>
+                                    <input class="form-control py-4" id="inputCartonSize" value="1" name="CartonSize"
+                                        type="number" min="0" required />
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputPackSize">Pack Size ------ e.g
+                                        pack(1x200)</label>
+                                    <input class="form-control py-4" id="inputPackSize" value="" name="PackSize"
+                                        type="number" min="0" required />
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                    <h4 class="mt-4">Prices</h4>
+                    <span class=" border border-bottom-0 border-dark col-xl-12">
+                        <div class="row">
+                            <div class="col-xl-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputRetailPrice">Retail Price</label>
+                                    <input class="form-control py-4" id="inputRetailPrice" name="RetailPrice"
+                                        type="number" required min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputSalePrice">TP/Sales Price(w)</label>
+                                    <input class="form-control py-4" id="inputSalePrice" name="SalePrice" type="number"
+                                        disabled min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputNetPrice">Net/Sales Price</label>
+                                    <input class="form-control py-4" id="inputNetPrice" name="NetPrice" type="number"
+                                        value="" required min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputDiscount">Discount %age</label>
+                                    <input class="form-control py-4" id="inputDiscount" value="0" name="discount"
+                                        type="number" min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputTax">Tax %age</label>
+                                    <input class="form-control py-4" id="inputTax" name="tax" value="0" type="number"
+                                        min="0" />
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Save Products / Items</label>
+                            <div class="form-group mt-2 mb-0"><button type="submit" style="width: 95px;"
+                                    class="btn btn-primary btn-block">Save Item</button></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% else %}
+
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item active">Edit Product</li>
+            </ol>
+
+            <form action="{{url_for('edit_product')}}" method="POST">
+                <input type="hidden" value="{{ edit_product._id }}" name="id">
+                <div class="row">
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputType">Item Type</label>
+                            <input class="form-control py-4" id="inputType" name="type" type="text"
+                                placeholder="Products" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputEdit">Edit Products</label>
+                            <select class="form-control selectpicker" style="height: 50px;"
+                                onchange="set_edit_product_path()" name="EditProduct" id="EditProduct">
+                                <option value="">--Select Production No--</option>
+                                {% for product in products %}
+                                {% if product._id == edit_product._id %}
+                                <option value="{{product._id}}" selected>{{product.Name}}</option>
+                                {% else %}
+                                <option value="{{product._id}}">{{product.Name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputName">Item Name</label>
+                            <input class="form-control py-4" id="inputName" name="name" type="text"
+                                placeholder="Enter Item Name" value="{{ edit_product.Name }}" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputGroup">Item Group</label>
+                            <select class="form-control selectpicker" onchange="get_default_supplier()"
+                                style="height: 50px;" name="group" id="group" required>
+                                <option value="">--Select Item Group--</option>
+                                <option value="Medicine">Medicine</option>
+                                <option value="Raw_Material">Raw Material</option>
+                                <option value="Packing_Material">Packing Material</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputDefaultSupplier">Default Supplier</label>
+                            <select class="form-control DefaultSupplier" style="height: 35px;" name="DefaultSupplier"
+                                id="DefaultSupplier" required>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <span class="border border-bottom-0 border-dark col-xl-12">
+                        <div class="row">
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputCartonSize">Carton Size -------- e.g
+                                        pack(1-200)</label>
+                                    <input class="form-control py-4" id="inputCartonSize" name="CartonSize"
+                                        type="number" min="0" value="{{ edit_product.Carton_Size }}" required />
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputPackSize">Pack Size ------ e.g
+                                        pack(1x200)</label>
+                                    <input class="form-control py-4" id="inputPackSize" name="PackSize" type="number"
+                                        min="0" value="{{ edit_product.Pack_Size }}" required />
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                    <h4 class="mt-4">Prices</h4>
+                    <span class=" border border-bottom-0 border-dark col-xl-12">
+                        <div class="row">
+                            <div class="col-xl-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputRetailPrice">Retail Price</label>
+                                    <input class="form-control py-4" id="inputRetailPrice" name="RetailPrice"
+                                        type="number" required value="{{ edit_product.Retail }}" min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputSalePrice">TP/Sales Price(w)</label>
+                                    <input class="form-control py-4" id="inputSalePrice" name="SalePrice" type="number"
+                                        disabled min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-4 col-md-4 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputNetPrice">Net/Sales Price</label>
+                                    <input class="form-control py-4" id="inputNetPrice" name="NetPrice" type="number"
+                                        value="{{ edit_product.Net_Price }}" required min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputDiscount">Discount %age</label>
+                                    <input class="form-control py-4" id="inputDiscount"
+                                        value="{{ edit_product.Discount }}" name="discount" type="number" min="0" />
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-6 col-sm-12">
+                                <div class="form-group">
+                                    <label class="small mb-1" for="inputTax">Tax %age</label>
+                                    <input class="form-control py-4" id="inputTax" name="tax"
+                                        value="{{ edit_product.Tax }}" type="number" min="0" />
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Update Products / Items</label>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary btn-block">Update Item
+                                    </button>
+                                </div>
+
+                                <div class="form-group">
+                                    <a href="/delete_item?id={{ edit_product._id }}" style="margin-left: 10px;"
+                                        class="btn btn-danger btn-block">Delete
+                                        Item</a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+
+
+
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    function get_default_supplier() {
+        var value = $('#group').val();
+
+        if ($(".DefaultSupplier").hasClass("selectpicker")) {
+            $(".DefaultSupplier").removeClass("selectpicker");
+        }
+
+        $('#DefaultSupplier option').remove();
+
+
+        if (value != '') {
+            $.ajax({
+                data: {
+                    DefaultSupplier: value,
+                    'csrfmiddlewaretoken': '{{csrf_token}}'
+                },
+                type: 'POST',
+                url: '/get_item_group'
+            })
+                .done(function (data) {
+
+                    if (data.Supplier) {
+                        $('#DefaultSupplier').append(`<option value="" selected>--Select Supplier--</option>`);
+                        $.each(data.Supplier, function (index, item) {
+
+                            $('#DefaultSupplier').append(`<option value="${item._id}">${item.Name}</option>`);
+                        });
+                    }
+                    else {
+                        $.each(data.OWN, function (index, item) {
+
+                            $('#DefaultSupplier').append(`<option selected value="${item._id}">${item.Name}</option>`);
+                        });
+                    }
+
+
+                });
+        }
+    }
+</script>
+<script>
+    function set_edit_product_path() {
+        if ($('#EditProduct').val() == '') {
+            window.location.href = "/items";
+        }
+        else {
+            window.location.href = "/items?id=" + $('#EditProduct').val();
+        }
+
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends "base.html" %} {% block body %}
+<div class="container-fluid">
+    <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Production
+    </h1>
+
+    {% with messages = get_flashed_messages() %} {% if messages %}
+
+    <div class="col-xl-12 col-md-12 col-sm-12">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                {% for message in messages %} {{ message }} {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %} {% endwith %}
+
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+            {% if edit_production == None %}
+
+            <form action="{{url_for('insert_production')}}" method="POST">
+                <div class="row">
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputNO">Production No/ Doc No</label>
+
+                            <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                name="DocNo" onchange="set_edit_production_path()" id="DocNo">
+                                <option value="" selected>--Select Production No--</option>
+                                {% for production in productions %}
+                                {% for pro in products %}
+
+                                {% if pro._id|string == production.Product_Name|string %}
+                                <option value="{{ production._id }}">{{ pro.Name }} - (Cr.Size: {{ pro.Carton_Size
+                                    }}, Pa.Size: {{pro.Pack_Size}}) - {{ production.Date_Time }}</option>
+                                {% endif %}
+
+                                {% endfor %}
+
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputExpiryDate">Expiry Date</label>
+                            <input class="form-control py-4" id="inputExpiryDate" name="ExpiryDate" type="date" required
+                                placeholder="Products" />
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputProductName">Product/Item Name</label>
+
+                            <select class="form-control selectpicker" data-live-search="true"
+                                onchange="enable_fileds(this)" style="height: 50px;" name="ProductName" id="ProductName"
+                                required placeholder="--Select Product Name--">
+                                <option value="" selected>--Select product Name--</option>
+                                {% for product in products %}
+                                <option value="{{ product._id }}">{{ product.Name }} - (Cr.Size: {{ product.Carton_Size
+                                    }}, Pa.Size: {{product.Pack_Size}})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputPackSize">Pack Size</label>
+                            <input class="form-control py-4" id="inputPackSize" name="PackSize" type="hidden" min="0" />
+                            <input class="form-control py-4" id="PackSize" type="number" min="0" required disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputBatch">Manufacture Batch</label>
+                            <input class="form-control py-4" id="inputBatch" name="batch" type="number" min="0" required
+                                disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputQuantity">Quantity</label>
+                            <input class="form-control py-4" id="inputQuantity" name="quantity" value="" type="number"
+                                disabled min="0" required onblur="set_pack_size(this)" />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputBonus">Bonus</label>
+                            <input class="form-control py-4" id="inputBonus" name="bonus" type="number" value="0"
+                                min="0" required disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputCompany">Company</label>
+                            <input type="hidden" value="{{ own._id }}" name="company_id">
+                            <input disabled value="{{ own.Name }}" class="form-control py-4" id="inputCompany"
+                                name="company" type="text" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Save Production</label>
+                            <div class="form-group mt-2 mb-0"><button type="submit" style="width: 150px;"
+                                    class="btn btn-primary btn-block">Save Production</button></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% else %}
+
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item active">Edit Production</li>
+            </ol>
+            <form action="{{url_for('edit_production')}}" method="POST">
+                <input type="hidden" value="{{ edit_production._id }}" name="id">
+                <div class="row">
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputNO">Doc_NO</label>
+
+                            <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                name="DocNo" onchange="set_edit_production_path()" id="DocNo">
+                                <option value="">--Select Production No--</option>
+                                {% for production in productions %}
+
+                                {% if production._id == edit_production._id %}
+
+                                {% for pro in products %}
+                                {% if pro._id|string == production.Product_Name|string %}
+                                <option selected value="{{ production._id }}">{{ pro.Name }} - (Cr.Size: {{
+                                    pro.Carton_Size
+                                    }}, Pa.Size: {{pro.Pack_Size}})</option>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% else %}
+
+                                {% for pro in products %}
+                                {% if pro._id|string == production.Product_Name|string %}
+                                <option value="{{ production._id }}">{{ pro.Name }} - (Cr.Size: {{ pro.Carton_Size
+                                    }}, Pa.Size: {{pro.Pack_Size}})</option>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% endif %}
+
+                                {% endfor %}
+                            </select>
+
+
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputExpiryDate">Expiry Date</label>
+                            <input class="form-control py-4" id="inputExpiryDate" name="ExpiryDate" type="date" required
+                                placeholder="Products" value="{{ edit_production.Expiry_Date }}" />
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputProductName">Product/Item Name</label>
+                            <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                name="ProductName" id="ProductName" required>
+                                <option value="">--Select product Name--</option>
+                                {% for product in products %}
+
+                                {% if product._id|string == edit_production.Product_Name|string %}
+                                <option selected value="{{ product._id }}">{{ product.Name }} - (Cr.Size: {{
+                                    product.Carton_Size
+                                    }}, Pa.Size: {{product.Pack_Size}})</option>
+                                {% else %}
+                                <option value="{{ product._id }}">{{ product.Name }} - (Cr.Size: {{ product.Carton_Size
+                                    }}, Pa.Size: {{product.Pack_Size}})</option>
+                                {% endif %}
+
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputPackSize">Pack Size</label>
+                            <input class="form-control py-4" id="inputPackSize" name="PackSize" type="hidden"
+                                value="{{ edit_production.Pack_Size }}" min="0" />
+                            <input class="form-control py-4" id="PackSize" type="number"
+                                value="{{ edit_production.Pack_Size }}" min="0" disabled />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputBatch">Manufacture Batch</label>
+                            <input class="form-control py-4" id="inputBatch" name="batch"
+                                value="{{ edit_production.Manufacture_Batch }}" type="number" min="0" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputQuantity">Quantity</label>
+                            <input class="form-control py-4" id="inputQuantity" name="quantity"
+                                value="{{ edit_production.Quantity }}" type="number" min="0"
+                                onblur="set_pack_size(this)" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputBonus">Bonus</label>
+                            <input class="form-control py-4" id="inputBonus" name="bonus" type="number"
+                                value="{{ edit_production.Bonus}}" min="0" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputCompany">Company</label>
+                            <input type="hidden" value="{{ own._id }}" name="company_id">
+                            <input disabled value="{{ own.Name }}" class="form-control py-4" id="inputCompany"
+                                name="company" type="text" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Update Production</label>
+                            <div class="form-group mt-2 mb-0"><button type="submit" style="width: 170px;"
+                                    class="btn btn-primary btn-block">Update Production</button></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function set_edit_production_path() {
+
+        if ($('#DocNo').val() == '') {
+            window.location.href = "/production";
+        } else {
+            window.location.href = "/production?id=" + $('#DocNo').val();
+        }
+
+    }
+    var pack_size
+    function set_pack_size(value) {
+        size = $("#ProductName option:selected").text();
+        size = parseInt(size.split(':')[2].replace(")", ""))
+        qn = parseInt($("#inputQuantity").val())
+        pack_size = Math.round(qn / size)
+        $("#inputPackSize").val(pack_size)
+        $("#PackSize").val(pack_size)
+
+
+    }
+
+    function enable_fileds(value) {
+        if (value.value != '') {
+            $("#PackSize").prop("disabled", true);
+            $("#inputBatch").prop("disabled", false);
+            $("#inputQuantity").prop("disabled", false);
+            $("#inputBonus").prop("disabled", false);
+        } else {
+            $("#inputPackSize").prop("disabled", true);
+            $("#inputBatch").prop("disabled", true);
+            $("#inputQuantity").prop("disabled", true);
+            $("#inputBonus").prop("disabled", true);
+        }
+    }
+</script>
+{% endblock %}

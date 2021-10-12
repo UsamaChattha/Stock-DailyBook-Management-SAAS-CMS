@@ -1,0 +1,686 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Day Book
+    </h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <div class="col-xl-12 col-md-12 col-sm-12">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+    {% endwith %}
+
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-xl-4 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label class="small mb-1" for="inputDate">Date</label>
+                        <input class="form-control py-4" id="inputDate" name="Date" onchange="set_date()" type="date" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-md-6 col-sm-6 border border-secondary">
+
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">
+                        <h3>Debit Side</h3>
+                    </li>
+                </ol>
+                <div class="row">
+                    <div class="col-xl-4 col-md-12 col-sm-12">
+                        <label class="small mb-1" for="inputAmount">
+                            <h4>Account(Dr)</h4>
+                        </label>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <div class="form-group mt-8 mb-0"><button type="button" data-toggle="modal"
+                                    data-target="#exampleModal" id="show_accounts_D" onclick="showAccounts('Debit')"
+                                    style="background-color: rgb(129, 245, 239);color: #000;"
+                                    class="btn btn-primary btn-block">Select Account
+                                </button></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <div class="form-group mt-8 mb-0"><button type="button" onclick="debit_refresh()"
+                                    style="background-color: rgb(222, 224, 70);color: #000;"
+                                    class="btn btn-primary btn-block">Refresh
+                                </button></div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xl-4 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <input id="D_A_ID" disabled type="text" class="form-control py-4" />
+                        </div>
+                    </div>
+                    <div class="col-xl-8 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <input id="D_A_NAME" disabled type="text" class="form-control py-4"
+                                style="background-color:rgb(108, 172, 135); text-align:center; color: white;" />
+                        </div>
+                    </div>
+
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xl-3 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputAmount">Amount</label>
+                            <input class="form-control py-4" id="D_A_ADD_AMMOUNT" name="amount" type="number" min="0"
+                                placeholder="Enter Amount" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-7 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputLedger">Ledger_Remarks</label>
+                            <input class="form-control py-4" id="D_A_ADD_REMARKS" name="ledger" type="text"
+                                placeholder="Enter Ledger" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton">Add</label>
+                            <a class="btn btn-secondary btn-success " onclick="set_account('Debit')" href="#"
+                                id="Add-item">Add</a>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-danger"></div>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="Debit" width="100%" cellspacing="0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>A_Name</th>
+                                <th>Debit</th>
+                                <th>Remarks</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if edit_new_date %}
+
+                            {% for d in edit_new_date %}
+
+                            {% if d.Pay_Type == "Debit" %}
+                            <tr>
+                                <td>{{ d.Name }}<input type="hidden" class="debit_A_ID" name="debit_A_ID"
+                                        value="{{ d._id}}"></td>
+                                <td>{{ d.Amount }}</td>
+                                <td>{{ d.Remarks }}</td>
+                                <td><button type="button" class="btn btn-primary btn-danger remove">X</button></td>
+                            </tr>
+                            {% endif %}
+
+                            {% endfor %}
+
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-xl-6 col-md-6 col-sm-6 border border-secondary">
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">
+                        <h3>Credit Side</h3>
+                    </li>
+                </ol>
+                <div class="row">
+                    <div class="col-xl-4 col-md-12 col-sm-12">
+                        <label class="small mb-1" for="inputAmount">
+                            <h4>Account(Cr)</h4>
+                        </label>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <div class="form-group mt-8 mb-0"><button type="button" data-toggle="modal"
+                                    data-target="#exampleModal" id="show_accounts_C" onclick="showAccounts('Credit')"
+                                    style="background-color: rgb(129, 245, 239);color: #000;"
+                                    class="btn btn-primary btn-block">Select Account
+                                </button></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <div class="form-group mt-8 mb-0"><button type="button" onclick="credit_refresh()"
+                                    style="background-color: rgb(222, 224, 70);color: #000;"
+                                    class="btn btn-primary btn-block">Refresh
+                                </button></div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xl-4 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <input id="C_A_ID" disabled type="text" class="form-control py-4" />
+                        </div>
+                    </div>
+                    <div class="col-xl-8 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <input id="C_A_NAME" disabled type="text" class="form-control py-4"
+                                style="background-color:rgb(108, 172, 135); text-align:center; color: white;" />
+                        </div>
+                    </div>
+
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xl-3 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputAmount">Amount</label>
+                            <input class="form-control py-4" id="C_A_ADD_AMMOUNT" name="amount" type="number" min="0"
+                                placeholder="Enter Amount" />
+                        </div>
+                    </div>
+                    <div class="col-xl-7 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputLedger">Ledger_Remarks</label>
+                            <input class="form-control py-4" id="C_A_ADD_REMARKS" name="ledger" type="text"
+                                placeholder="Enter Ledger" required />
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-7" for="inputButton">Add</label>
+                            <a class="btn btn-secondary btn-success form-group" onclick="set_account('Credit')" href="#"
+                                id="Add-item">Add</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-danger"></div>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="Credit" width="100%" cellspacing="0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>A_Name</th>
+                                <th>Credit</th>
+                                <th>Remarks</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if edit_new_date %}
+
+                            {% for d in edit_new_date %}
+
+                            {% if d.Pay_Type == "Credit" %}
+                            <tr>
+                                <td>{{ d.Name }}<input type="hidden" class="credit_A_ID" name="credit_A_ID"
+                                        value="{{ d._id}}"></td>
+                                <td>{{ d.Amount }}</td>
+                                <td>{{ d.Remarks }}</td>
+                                <td><button type="button" class="btn btn-primary btn-danger remove">X</button></td>
+                            </tr>
+                            {% endif %}
+
+                            {% endfor %}
+
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <form action="{{url_for('insert_book')}}" onsubmit="get_table_data(event)" id="my_form" method="POST">
+                <div class="row col-xl-12">
+                    <div class="col-xl-5"></div>
+                    <div class="col-xl-2 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputButton"></label>
+                            <div class="form-group mt-2 mb-0">
+                                <button id="submit" type="submit" class="btn btn-primary btn-block">Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5"></div>
+                </div>
+            </form>
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 style="text-align: center;" class="modal-title" id="exampleModalLabel">Account List
+                            </h3>
+                        </div>
+                        <div class="modal-body">
+                            <form id="select_Account_Form" style="width: 100%;" onsubmit="setAccount(event)">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="accounts" width="100%" cellspacing="0">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Description</th>
+                                                <th>Select</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for buyers in buyer %}
+                                            <tr>
+                                                <td>{{loop.index}}<input type="hidden" class="account_id_radio"
+                                                        value="{{ buyers._id  }}"></td>
+                                                <td><b>{{buyers.Name}}</b>,({{buyers.City}}),({{buyers.Type}})</td>
+                                                <td><input required type="radio" name="selectedAccount"
+                                                        onclick="setRadioValue(this)" /></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <input placeholder="Search Account by Description.." id="searchAccount"
+                                    onkeyup="getAccount()" class="form-control"
+                                    style="border:1px solid black;background-color:#585757;color:white;width: 470px;" />
+                                <br />
+                                <div class="col-md-12">
+                                    <hr>
+                                    <center>
+                                        <button class="btn btn-primary" type="submit">Select Account</button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                            onclick="closePopup(event)">Close</button>
+                                    </center>
+                                </div>
+                            </form>
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+    var selectType = null;
+    accounts = []
+
+    '{% for b in buyer %}'
+    accounts.push({
+        'id': '{{ b._id }}',
+        'name': '{{ b.Name }}',
+        'city': '{{ b.City }}',
+        'type': '{{ b.Type }}'
+    })
+    '{% endfor %}'
+
+    console.log(accounts)
+
+    $(document).ready(function () {
+        $('#Credit').DataTable({
+            responsive: true,
+            aLengthMenu: [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            iDisplayLength: -1
+        });
+
+        $('#Debit').DataTable({
+            responsive: true,
+            aLengthMenu: [
+                [25, 50, 100, 200, -1],
+                [25, 50, 100, 200, "All"]
+            ],
+            iDisplayLength: -1
+        });
+
+        $('#Credit').on('click', '.remove', function () {
+            var table = $('#Credit').DataTable(
+                {
+                    responsive: true,
+                    aLengthMenu: [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "All"]
+                    ],
+                    iDisplayLength: -1
+                }
+            );
+            var row = $(this).parents('tr');
+
+            if ($(row).hasClass('child')) {
+                table.row($(row).prev('tr')).remove().draw();
+            } else {
+                table
+                    .row($(this).parents('tr'))
+                    .remove()
+                    .draw();
+            }
+
+        });
+
+        $('#Debit').on('click', '.remove', function () {
+            var table = $('#Debit').DataTable(
+                {
+                    responsive: true,
+                    aLengthMenu: [
+                        [25, 50, 100, 200, -1],
+                        [25, 50, 100, 200, "All"]
+                    ],
+                    iDisplayLength: -1
+                }
+            );
+            var row = $(this).parents('tr');
+
+            if ($(row).hasClass('child')) {
+                table.row($(row).prev('tr')).remove().draw();
+            } else {
+                table
+                    .row($(this).parents('tr'))
+                    .remove()
+                    .draw();
+            }
+
+        });
+    });
+
+    function debit_refresh() {
+        $('#D_A_ID').val('');
+        $('#D_A_NAME').val('');
+        $('#D_A_ADD_AMMOUNT').val('');
+        $('#D_A_ADD_REMARKS').val('');
+
+        document.getElementById("select_Account_Form").reset();
+        $('#searchAccount').val("");
+        getAccount();
+    }
+
+
+    function credit_refresh() {
+        $('#C_A_ID').val('');
+        $('#C_A_NAME').val('');
+        $('#C_A_ADD_AMMOUNT').val('');
+        $('#C_A_ADD_REMARKS').val('');
+
+        document.getElementById("select_Account_Form").reset();
+        $('#searchAccount').val("");
+        getAccount();
+    }
+
+
+    function set_account(table_id) {
+
+        if (table_id == 'Debit') {
+
+            $("#" + table_id + " tr:gt(0)").each(function (index) {
+                if (index == 0) {
+                    var this_row = $(this);
+                    var check = $.trim(this_row.find('td:eq(0)').html());
+                    if (check.indexOf("No data available in table") >= 0) {
+                        $("#" + table_id + " tbody").empty();
+                    }
+
+                }
+            });
+
+
+            id = $('#D_A_ID').val();
+            account_name = $('#D_A_NAME').val();
+            ammount = $('#D_A_ADD_AMMOUNT').val();
+            remarks = $('#D_A_ADD_REMARKS').val();
+
+            if (id == '' || account_name == '') {
+                alert('Please Select Account First.')
+            }
+            else if (ammount == '') {
+                alert('Please Add Amount First.')
+                $('#D_A_ADD_AMMOUNT').focus();
+            }
+            else if (remarks == '') {
+                alert('Please Add Remarks First.');
+                $('#D_A_ADD_REMARKS').focus();
+            }
+            else {
+
+                $('#Debit').DataTable().destroy();
+
+                $.each(accounts, function (i, item) {
+                    if (item.id == id) {
+
+                        $("#" + table_id + " tbody").append(
+                            `  
+                                var value = 
+                                <tr>
+                                    <td>${item.name}<input type="hidden" class="debit_A_ID" name="debit_A_ID" value="${item.id}"></td>
+                                    <td>${ammount}</td>
+                                    <td>${remarks}</td>
+                                    <td><button type="button" class="btn btn-primary btn-danger remove">X</button></td>
+                                </tr>    
+                        `)
+                    }
+                });
+
+
+                debit_refresh()
+                $('#Debit').DataTable(
+                    {
+                        responsive: true,
+                        aLengthMenu: [
+                            [25, 50, 100, 200, -1],
+                            [25, 50, 100, 200, "All"]
+                        ],
+                        iDisplayLength: -1
+                    }
+                );
+
+            }
+
+        }
+        else {
+
+            $("#" + table_id + " tr:gt(0)").each(function (index) {
+                if (index == 0) {
+                    var this_row = $(this);
+                    var check = $.trim(this_row.find('td:eq(0)').html());
+                    if (check.indexOf("No data available in table") >= 0) {
+                        $("#" + table_id + " tbody").empty();
+                    }
+
+                }
+            });
+
+
+            id = $('#C_A_ID').val();
+            account_name = $('#C_A_NAME').val();
+            ammount = $('#C_A_ADD_AMMOUNT').val();
+            remarks = $('#C_A_ADD_REMARKS').val();
+
+            if (id == '' || account_name == '') {
+                alert('Please Select Account First.')
+            }
+            else if (ammount == '') {
+                alert('Please Add Amount First.')
+                $('#C_A_ADD_AMMOUNT').focus();
+            }
+            else if (remarks == '') {
+                alert('Please Add Remarks First.');
+                $('#C_A_ADD_REMARKS').focus();
+            }
+            else {
+
+                $('#Credit').DataTable().destroy();
+
+                $.each(accounts, function (i, item) {
+                    if (item.id == id) {
+                    
+                        $("#" + table_id + " tbody").append(
+                            `  
+                                var value = 
+                                <tr>
+                                    <td>${item.name}<input type="hidden" class="credit_A_ID" name="credit_A_ID" value="${item.id}"></td>
+                                    <td>${ammount}</td>
+                                    <td>${remarks}</td>
+                                    <td><button type="button" class="btn btn-primary btn-danger remove">X</button></td>
+                                </tr>    
+                        `)
+                    }
+                });
+
+                credit_refresh()
+                $('#Credit').DataTable(
+                    {
+                        responsive: true,
+                        aLengthMenu: [
+                            [25, 50, 100, 200, -1],
+                            [25, 50, 100, 200, "All"]
+                        ],
+                        iDisplayLength: -1
+                    }
+                );
+
+            }
+
+        }
+    }
+
+    function get_table_data(event) {
+
+
+        $("#Debit > tbody > tr").each(function (index) {
+            var this_row = $(this);
+            var Amount = $.trim(this_row.find('td:eq(1)').html())
+            var Remarks = $.trim(this_row.find('td:eq(2)').html())
+            var id = $.trim(this_row.find('.debit_A_ID').val());
+
+            var row = Amount + '%' + Remarks + "%" + id
+            $('#my_form').append(`<input type="hidden" Name="debit_table" value="${row}" /> `)
+        });
+
+        $("#Credit > tbody > tr").each(function (index) {
+            var this_row = $(this);
+            var Amount = $.trim(this_row.find('td:eq(1)').html())
+            var Remarks = $.trim(this_row.find('td:eq(2)').html())
+            var id = $.trim(this_row.find('.credit_A_ID').val());
+
+            var row = Amount + '%' + Remarks + "%" + id
+
+            $('#my_form').append(`<input type="hidden" Name="credit_table" value="${row}" /> `)
+        });
+
+        $('#my_form').append(`<input type="hidden" name="book_date" value="${$('#inputDate').val()}" /> `)
+
+    }
+
+    function setRadioValue(radio) {
+        var currentID = $(radio).parent().parent().children().find('.account_id_radio').val();
+        $("input[name=selectedAccount]").val(currentID);
+    }
+
+    function getAccount() {
+        input = document.getElementById("searchAccount");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("accounts");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    function setAccount(event) {
+        event.preventDefault();
+
+        $('#D_A_ADD_AMMOUNT').val('');
+        $('#D_A_ADD_REMARKS').val('');
+
+        var ID = $("input[name=selectedAccount]").val();
+
+        var ammount = 0;
+        var name = null;
+        $.each(accounts, function (i, item) {
+            if (item.id == ID) {
+
+                name = item.name + " (" + item.city + ")";
+            }
+        });
+
+        document.getElementById("select_Account_Form").reset();
+        $('#searchAccount').val("");
+        getAccount();
+
+
+        if (selectType == 'Debit') {
+            $('#D_A_ID').val(ID);
+
+            $('#D_A_NAME').val(name);
+            $('#D_A_ADD_AMMOUNT').focus();
+        }
+        else if (selectType == 'Credit') {
+            $('#C_A_ID').val(ID);
+
+            $('#C_A_NAME').val(name);
+            $('#C_A_ADD_AMMOUNT').focus();
+        }
+
+        $('#exampleModal').modal('toggle');
+    }
+
+    function closePopup(event) {
+        event.preventDefault();
+        document.getElementById("select_Account_Form").reset();
+        $('#searchAccount').val("");
+        getAccount();
+
+        $('#exampleModal').modal('toggle');
+    }
+
+
+    function showAccounts(account) {
+        selectType = account;
+        $('exampleModal').modal('show');
+        $('#searchAccount').focus();
+    }
+
+
+    window.onload = function () {
+        var now = new Date();
+        var day = ("0" + now.getDate()).slice(-2);
+        var month = ("0" + (now.getMonth() + 1)).slice(-2);
+        var today = now.getFullYear() + "-" + (month) + "-" + (day);
+        $('#inputDate').val(today);
+        $('#inputDate').attr('max', today);
+
+
+        '{% if edit_date %}'
+
+        $('#inputDate').val('{{ edit_date }}');
+
+        '{% endif %}'
+
+
+    }
+
+    function set_date() {
+        window.location.href = "/DayBook?inputdate=" + $('#inputDate').val();
+
+    }
+</script>
+
+{% endblock %}

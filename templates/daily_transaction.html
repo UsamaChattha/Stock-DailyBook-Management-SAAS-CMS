@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Transaction
+    </h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <div class="col-xl-12 col-md-12 col-sm-12">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+    {% endwith %}
+
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+            <div class="row" >
+                <div class="col-xl-4 col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label class="small mb-1" for="inputDate">Select Date</label>
+                        <input class="form-control py-4" id="inputDate" name="Date" type="date" />
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label class="small mb-1" for="inputDate">Reset</label>
+                        <button class="btn btn-dark" style="width: 100%;">Reset Dates</button>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label class="small mb-1" for="inputDate">Standard Form</label>
+                        <button class="btn btn-dark" style="width: 100%;">Print</button>
+                    </div>
+                </div>
+            </div>
+            
+            
+
+        </div>
+    </div>
+
+
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+            <div class="row" >
+                <div class="col-xl-12 col-md-12 col-sm-12">
+                    <center>
+                        <label><h2><b><u>Daily Tranasaction</u></b></h2></label>
+                    </center>
+                </div>
+                <div class="col-lg-6 col-lg-offset-4 col-md-12 col-sm-12">
+                
+                        <h3>From   <label>date</label>   To   <label>date</label></h3>
+                    
+                </div>
+                <div class="col-lg-2 col-md-12 col-sm-12">
+                    <div class="form-group">
+                        <label class="small mb-1" for="inputDate">Today Date</label>
+                        <input class="form-control py-4" type="text" id="currentDate" disabled />
+                    </div>
+                </div>
+                <div class="col-lg-4 col-lg-offset-4 col-md-12 col-md-offset-4 col-sm-12">
+                    <center>
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputDate">Selected Date</label>
+                            <input class="form-control py-4" type="text"  />
+                        </div>
+                    </center>
+                </div>
+            </div>
+            <br>
+            <table class="table table-hover">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Account</th>
+                    <th>Close<br>Debit</th>
+                    <th>Close<br>Credit</th>
+                    <th>Open<br>Debit</th>
+                    <th>Open<br>Credit</th>
+                    <th>Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>Mark</td>
+                    <td>Otto</td>                    
+                  </tr>
+                  <tr>
+                    <th>2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td> 
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>Mark</td>
+                    <td>Otto</td>                   
+                  </tr>
+                  <tr>
+                    <th>3</th>
+                    <td>Larry</td>
+                    <td>the Bird</td>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                  </tr>
+                </tbody>
+              </table>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    var today = new Date();
+    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    var dateTime = date;
+    document.getElementById("currentDate").value = dateTime;
+</script>
+
+{% endblock %}

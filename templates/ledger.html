@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Ledger
+    </h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <div class="col-xl-12 col-md-12 col-sm-12">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+    {% endwith %}
+
+
+    <div class="card" style="margin-top: 100px;">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('ledger_details') }}">
+                <div class="row col-xl-12">
+                    <div class="col-xl-12 col-md-12 col-sm-12">
+                        <center>
+                            <label>
+                                <h2><b><u>Select Account for Ledger</u></b></h2>
+                            </label>
+                        </center>
+                    </div>
+                    <div class="col-lg-8 col-lg-offset-2 col-md-12 col-md-offset-2 col-sm-12">
+                        <center>
+                            <div class="form-group">
+                                <label class="small mb-1" for="BuyersList">Accounts</label>
+                                <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                    name="BuyerId" id="buyersList" required>
+                                    <option value="" selected>--Select Account--</option>
+                                    {% for buyer in buyers %}
+                                    <option value="{{buyer._id}}">{{buyer.Name}} - ({{ buyer.Address }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </center>
+                    </div>
+                    <div class="col-lg-8 col-lg-offset-2 col-md-12 col-md-offset-2 col-sm-12">
+                        <center>
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputDate">Start Date</label>
+                                <input class="form-control py-4" required id="start" name="StartDate" type="date" />
+                            </div>
+                        </center>
+                    </div>
+                    <div class="col-lg-8 col-lg-offset-2 col-md-12 col-md-offset-2 col-sm-12">
+                        <center>
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputDate">End Date</label>
+                                <input class="form-control py-4" required id="end" name="EndDate" type="date" />
+                            </div>
+                        </center>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-4 col-md-12 col-md-offset-4 col-sm-12">
+                        <center>
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputButton">See Ledger</label>
+                                <div class="form-group mt-2 mb-0">
+                                    <button style="width: 100% ;" class="btn btn-primary btn-block">Account
+                                        Ledger</button>
+                                </div>
+                            </div>
+                        </center>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    var now = new Date();
+
+    var day = ("0" + now.getDate()).slice(-2);
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+    var today = now.getFullYear() + "-" + (month) + "-" + (day);
+
+    $('#start').val(today);
+    $('#end').val(today);
+</script>
+
+{% endblock %}

@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+
+
+
+<main>
+    <div class="container-fluid">
+        <h1 style="text-align:center; background-color: aquamarine;" class="p-6 mb-2 text-dark font-weight-bold">Buyers
+            / Suppliers</h1>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+
+        <div class="col-xl-12 col-md-12 col-sm-12">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% endif %}
+        {% endwith %}
+
+
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-body">
+
+                {% if edit_buyer == None %}
+
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">Add New (Buyer/supplier)</li>
+                </ol>
+
+                <form action="{{url_for('insert_buyer')}}" method="POST">
+                    <div class="row">
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputName">Name</label>
+                                <input class="form-control py-4" id="inputName" name="name" type="text"
+                                    placeholder="Enter Name" required />
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6  col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputEmail">Email</label>
+                                <input class="form-control py-4" id="inputEmail" name="email" type="email"
+                                    placeholder="Enter Email" />
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputAddress">Address</label>
+                                <input class="form-control py-4" id="inputAddress" name="address" type="text"
+                                    placeholder="Enter Address" required />
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputContact">Contact</label>
+                                <input class="form-control py-4" id="inputContact" name="contact"
+                                    placeholder="____-_______" data-slots="_" required />
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputCity">City</label>
+                                <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                    name="city" id="city" required placeholder="--Select City--">
+                                    <option value="" selected>--Select City--</option>
+                                    {% for city in cities %}
+                                    <option value="{{ city }}">{{ city }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputType">Type</label>
+
+                                <select class="form-control selectpicker" style="height: 50px;" name="type" id="type"
+                                    required>
+                                    <option value="" selected>--Select Type--</option>
+                                    <option value="Buyers">Buyers</option>
+                                    <option value="Suppliers">Suppliers</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputButton">Add New (Buyer/supplier)</label>
+                                <div class="form-group mt-2 mb-0"><button type="submit" style="width: 60px;"
+                                        class="btn btn-primary btn-block">Add</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                {% else %}
+
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">Edit (Buyer/Supplier)</li>
+                </ol>
+
+                <form action="{{url_for('edit_buyer')}}" method="POST">
+                    <input type="hidden" value="{{ edit_buyer._id }}" name="id">
+                    <div class="row">
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputName">Name</label>
+                                <input class="form-control py-4" id="inputName" name="name" type="text"
+                                    placeholder="Enter Name" required value="{{ edit_buyer.Name }}" />
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputEmail">Email</label>
+                                <input class="form-control py-4" id="inputEmail" name="email" type="email"
+                                    placeholder="Enter Email" value="{{ edit_buyer.Email }}" />
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputAddress">Address</label>
+                                <input class="form-control py-4" id="inputAddress" name="address" type="text"
+                                    placeholder="Enter Address" required value="{{ edit_buyer.Address }}" />
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputContact">Contact</label>
+                                <input class="form-control py-4" id="inputContact" name="contact"
+                                    value="{{ edit_buyer.Contact }}" placeholder="____-_______" data-slots="_"
+                                    required />
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputCity">City</label>
+
+                                <select class="form-control selectpicker" data-live-search="true" style="height: 50px;"
+                                    name="city" id="city" required placeholder="--Select City--">
+                                    <option value="" selected>--Select City--</option>
+                                    {% for city in cities %}
+
+                                    {% if city == edit_buyer.City %}
+                                    <option selected value="{{ city }}">{{ city }}</option>
+                                    {% else %}
+                                    <option value="{{ city }}">{{ city }}</option>
+                                    {% endif %}
+
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputCity">Type</label>
+
+                                <select class="form-control selectpicker" value="{{ edit_buyer.Type }}"
+                                    style="height: 50px;" name="type" id="type" required>
+                                    {% if edit_buyer.Type == 'Buyers' %}
+                                    <option selected value="Buyers">Buyers</option>
+                                    <option value="Suppliers">Suppliers</option>
+                                    {% else %}
+                                    <option selected value="Suppliers">Suppliers</option>
+                                    <option value="Buyers">Buyers</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label class="small mb-1" for="inputButton">Update (Buyer/supplier)</label>
+                                <div class="form-group mt-2 mb-0"><button type="submit" style="width: 80px;"
+                                        class="btn btn-primary btn-block">Update</button></div>
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                {% endif %}
+
+            </div>
+        </div>
+
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i>
+                Buyers List
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="dataTableBuyer" width="100%" cellspacing="0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Sr.</th>
+                                <th>Type</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Contact</th>
+                                <th>City</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for buyer in buyers %}
+                            <tr>
+                                <td>{{loop.index}}</td>
+                                <td>{{ buyer.Type }}</td>
+                                <td>{{ buyer.Name }}</td>
+                                <td>{{ buyer.Email }}</td>
+                                <td>{{ buyer.Address }}</td>
+                                <td>{{ buyer.Contact }}</td>
+                                <td>{{ buyer.City }}</td>
+                                <td><a href="/buyers?id={{buyer._id}}">Edit</a></td>
+                                
+                                <td><a style="color: red;" href="#" onclick="set_delete_buyer_path('{{buyer._id}}')"
+                                        data-toggle="modal" data-target="#exampleModal">Delete</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Confirm?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure want to delete this buyer?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+                        <a class="btn btn-secondary btn-danger" href="#" id="delete_buyer">Yes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+</main>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#dataTableBuyer').DataTable(
+            {
+                aLengthMenu: [
+                    [25, 50, 100, 200, -1],
+                    [25, 50, 100, 200, "All"]
+                ],
+                iDisplayLength: -1
+            }
+        );
+
+        for (const el of document.querySelectorAll("[placeholder][data-slots]")) {
+            const pattern = el.getAttribute("placeholder"),
+                slots = new Set(el.dataset.slots || "_"),
+                prev = (j => Array.from(pattern, (c, i) => slots.has(c) ? j = i + 1 : j))(0),
+                first = [...pattern].findIndex(c => slots.has(c)),
+                accept = new RegExp(el.dataset.accept || "\\d", "g"),
+                clean = input => {
+                    input = input.match(accept) || [];
+                    return Array.from(pattern, c =>
+                        input[0] === c || slots.has(c) ? input.shift() || c : c
+                    );
+                },
+                format = () => {
+                    const [i, j] = [el.selectionStart, el.selectionEnd].map(i => {
+                        i = clean(el.value.slice(0, i)).findIndex(c => slots.has(c));
+                        return i < 0 ? prev[prev.length - 1] : back ? prev[i - 1] || first : i;
+                    });
+                    el.value = clean(el.value).join``;
+                    el.setSelectionRange(i, j);
+                    back = false;
+                };
+            let back = false;
+            el.addEventListener("keydown", (e) => back = e.key === "Backspace");
+            el.addEventListener("input", format);
+            el.addEventListener("focus", format);
+            el.addEventListener("blur", () => el.value === pattern && (el.value = ""));
+        }
+
+    });
+
+
+
+
+    function set_delete_buyer_path(id) {
+        $("#delete_buyer").attr("href", "/delete_buyer?id=" + id);
+    }
+</script>
+
+
+{% endblock %}
