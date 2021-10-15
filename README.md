@@ -10,7 +10,7 @@ This project is live on Heroku Server at [Kn-Herbal](https://kn-herbal.herokuapp
     <tr>
         <td align="center">
             <a href="https://raw.githubusercontent.com/UsamaChattha/Stock-DailyBook-Management-SAAS-CMS/main/ScreenShot/login.JPG">
-                <img src="ScreenShot/img1.JPG" alt="Screenshot Home" width="300px" />
+                <img src="ScreenShot/login.JPG" alt="Screenshot Home" width="300px" />
             </a>
         </td>
         <td align="center">
